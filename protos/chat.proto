@@ -1,0 +1,31 @@
+syntax = "proto3";
+package chat.v1;
+
+message ChatMessage {
+  string user = 1;
+  string text = 2;
+  string timestamp = 3;        // ISO 8601, format string pour rester simple
+}
+
+message SubscribeRequest {          // CLIENT STREAMING (2.5)
+  string user = 1;
+  repeated ChatMessage messages = 2;  // "repeated" = liste (0 à N éléments)
+}
+
+message UploadSummary {
+  int32 count = 1;                // Nombre total de messages reçus
+}
+
+service ChatService {
+  // UNARY : envoyer un message et recevoir un accusé
+  rpc SendMessage (ChatMessage) returns (ChatMessage);
+
+  // SERVER STREAMING : s'abonner à l'historique des messages d'un utilisateur
+  rpc History (ChatMessage) returns (stream ChatMessage);
+
+  // CLIENT STREAMING : envoyer un lot de messages, recevoir un résumé
+  rpc UploadBatch (stream SubscribeRequest) returns (UploadSummary);
+
+  // BIDIRECTIONNEL : chat en temps réel
+  rpc Chat (stream ChatMessage) returns (stream ChatMessage);
+}
