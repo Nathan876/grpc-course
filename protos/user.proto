@@ -5,7 +5,7 @@ package user.v1;                          // Namespace : évite les collisions d
 // ---------- LES MESSAGES : la structure des données ----------
 
 message GetUserRequest {                  // Ce que le client ENVOIE
-  int32 user_id = 1;                      // Champ typé. Le "= 1" est un NUMÉRO de champ,
+  int32 user_id = 4;                      // Champ typé. Le "= 1" est un NUMÉRO de champ,
 }                                         // pas une valeur ! Il identifie le champ dans le
                                           // format binaire et ne doit JAMAIS changer une fois publié.
 
@@ -13,10 +13,17 @@ message User {                            // Ce que le serveur RÉPOND
   int32 id = 1;                           // Identifiant de l'utilisateur
   string name = 2;                        // Nom (chaîne UTF-8)
   string email = 3;                        // Adresse e-mail
+  string nickname = 4;
+  Address address = 5;
 }
 
 message GetUserResponse {                 // Enveloppe de réponse (bonne pratique : pouvoir
   User user = 1;                          // ajouter des champs plus tard sans casser le contrat)
+}
+
+message Address {
+  string street = 1;
+  string city = 2;
 }
 
 // ---------- LE SERVICE : les méthodes exposées ----------
