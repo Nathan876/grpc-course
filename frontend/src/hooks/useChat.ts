@@ -1,81 +1,111 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ChatMessage, HistoryRequest } from "../generated/chat_pb";
-import { client } from "../grpc/client";
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { ChatMessage, HistoryRequest } from '../generated/chat_pb'
+import { client } from '../grpc/client'
+import { grpcErrorMessage } from '../grpc/errors.ts'
 
-// La forme d'un message côté UI (découplé du type protobuf)
 export interface UiMessage {
   id: number;
   user: string;
   text: string;
   timestamp: string;
-  mine: boolean;        // true = envoyé par MOI (pour styliser à droite)
+  mine: boolean;
 }
 
-export function useChat(myName: string) {
-  const [messages, setMessages] = useState<UiMessage[]>([]);
-  const [connected, setConnected] = useState(false);
-  const [error, setError] = useState("");
-  const counter = useRef(0);          // compteur d'ids uniques, survit aux re-renders
+// Entre deux onglets sur le même myName, gRPC-web ne peut rien pousser tout
+// seul (pas de bidi côté navigateur) : on rafraîchit l'historique à
+// intervalle régulier pour simuler le "temps réel".
+const POLL_INTERVAL_MS = 4000
 
-  // ⚠️ grpc-web ne génère QUE des méthodes Unary et Server Streaming pour le
-  // navigateur : il n'y a pas de client.chat() (bidirectionnel) ni de
-  // client.uploadBatch() (client streaming). On simule le "temps réel" en
-  // rechargeant l'historique (Server Streaming) au montage et après chaque envoi.
+export function useChat (myName: string) {
+  const [messages, setMessages] = useState<UiMessage[]>([])
+  const [connected, setConnected] = useState(false)
+  const [error, setError] = useState('')
+  const [retryable, setRetryable] = useState(false)
+  const counter = useRef(0)
+  const streamRef = useRef<any>(null)
+  const lastActionRef = useRef<(() => void) | null>(null)
+
   const loadHistory = useCallback(() => {
-    setMessages([]);
-    // History attend un HistoryRequest (user + limit), pas un ChatMessage
-    const request = new HistoryRequest().setUser(myName).setLimit(50);
-    const stream = client.history(request, {});
+    if (streamRef.current) {
+      streamRef.current.cancel()
+    }
 
-    stream.on("data", (msg: ChatMessage) => {
-      const mine = msg.getUser() === myName;
+    setMessages([])
+    const request = new HistoryRequest().setUser(myName).setLimit(50)
+
+    const stream = client.history(request, {})
+    streamRef.current = stream
+    setConnected(true)
+
+    stream.on('data', (msg: ChatMessage) => {
+      const mine = msg.getUser() === myName
       setMessages((prev) => [
         ...prev,
         {
-          id: ++counter.current,          // id unique pour la key React
+          id: ++counter.current,
           user: msg.getUser(),
           text: msg.getText(),
           timestamp: msg.getTimestamp(),
-          mine,
-        },
-      ]);
-    });
+          mine
+        }
+      ])
+    })
 
-    stream.on("error", (err) => {
-      setConnected(false);
-      setError(`Connexion perdue : ${err.message}`);
-    });
+    stream.on('error', (err: any) => {
+      setConnected(false)
+      const { message, retryable } = grpcErrorMessage(err)
+      setError(message)
+      setRetryable(retryable)
+      lastActionRef.current = () => loadHistory()
+    })
 
-    return stream;
-  }, [myName]);
+    return stream
+  }, [myName])
 
-  // ---------- CONNEXION : on charge l'historique au montage ----------
   useEffect(() => {
-    setConnected(true);
-    const stream = loadHistory();
+    setConnected(true)
+    const stream = loadHistory()
+    const poll = setInterval(loadHistory, POLL_INTERVAL_MS)
 
-    // Nettoyage au démontage : on FERME le flux (règle d'or du Module 3)
     return () => {
-      stream.cancel();
-    };
-  }, [loadHistory]);     // si myName change, on se reconnecte
+      clearInterval(poll)
+      if (stream) stream.cancel()
+    }
+  }, [loadHistory])
 
-  // ---------- ENVOI : appel unary, puis rechargement de l'historique ----------
   const send = useCallback(
     (text: string) => {
-      if (!text.trim()) return;
+      if (!text.trim()) return
+      setError('')
       const msg = new ChatMessage()
       .setUser(myName)
       .setText(text)
-      .setTimestamp(new Date().toISOString());
+      .setTimestamp(new Date().toISOString())
 
       client.sendMessage(msg, {})
-        .then(() => loadHistory())
-        .catch((err) => setError(`Envoi échoué : ${err.message}`));
+      .then(() => loadHistory())
+      .catch((err: any) => {
+        const { message, retryable } = grpcErrorMessage(err)
+        setError(message)
+        setRetryable(retryable)
+        lastActionRef.current = () => send(text)
+      })
     },
     [myName, loadHistory]
-  );
+  )
 
-  return { messages, send,
-    connected, error };
+  const retry = useCallback(() => {
+    setError('')
+    setRetryable(false)
+    lastActionRef.current?.()
+  }, [])
+
+  return {
+    messages,
+    send,
+    connected,
+    error,
+    retryable,
+    retry
+  }
 }

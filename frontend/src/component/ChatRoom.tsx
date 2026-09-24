@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useChat } from "../hooks/useChat";
 
 export function ChatRoom({ myName }: { myName: string }) {
-  const { messages, send, connected, error } = useChat(myName);
+  const { messages, send, connected, error, retryable, retry } = useChat(myName);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -20,7 +20,16 @@ export function ChatRoom({ myName }: { myName: string }) {
   return (
     <div style={{ maxWidth: 600, margin: "2rem auto", fontFamily: "sans-serif" }}>
       <h2>💬 Chat temps réel {connected ? "🟢" : "🔴"}</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && (
+        <p style={{ color: "red" }}>
+          {error}
+          {retryable && (
+            <button onClick={retry} style={{ marginLeft: 8 }}>
+              Réessayer
+            </button>
+          )}
+        </p>
+      )}
 
       {/* La fenêtre de messages : hauteur fixe, défilement auto */}
       <div style={{ height: 300, overflowY: "auto", border: "1px solid #ccc", padding: 10 }}>
