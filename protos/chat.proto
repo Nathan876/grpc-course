@@ -16,12 +16,17 @@ message UploadSummary {
   int32 count = 1;                // Nombre total de messages reçus
 }
 
+message HistoryRequest {
+  string user = 1;
+  int32 limit = 2;
+}
+
 service ChatService {
   // UNARY : envoyer un message et recevoir un accusé
   rpc SendMessage (ChatMessage) returns (ChatMessage);
 
   // SERVER STREAMING : s'abonner à l'historique des messages d'un utilisateur
-  rpc History (ChatMessage) returns (stream ChatMessage);
+  rpc History (HistoryRequest) returns (stream ChatMessage);
 
   // CLIENT STREAMING : envoyer un lot de messages, recevoir un résumé
   rpc UploadBatch (stream SubscribeRequest) returns (UploadSummary);

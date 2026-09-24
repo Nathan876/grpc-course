@@ -1,4 +1,6 @@
 import sys
+from xml.dom import NOT_FOUND_ERR
+
 sys.path.append('generated')
 import grpc
 from concurrent import futures
@@ -23,15 +25,31 @@ class ChatService(chat_pb2_grpc.ChatServiceServicer):
             timestamp=request.timestamp,
         )
 
+    def DeleteMessage(self, request, context):
+        trouve = False
+        for msg in MESSAGES:
+            if msg.user == request.user:
+                trouve = True
+                MESSAGES.remove(msg)
+        if not trouve:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Le message n'existe pas")
+        return chat_pb2.UploadSummary(
+            count=1
+        )
     # ================= 2. SERVER STREAMING =================
     def History(self, request, context):
         """Le client demande l'historique des messages d'un user.
         On `yield` un message à la fois : le serveur POUSSERA chaque
         élément au client dès qu'on le produit. Le client les reçoit
         au fur et à mesure (pas besoin d'attendre toute la liste)."""
+        message = []
         for msg in MESSAGES:
             if msg.user == request.user:
-                yield msg                # ← "stream" côté returns = yield
+                message.append(msg)
+        message = message[-request.limit:]
+
+        for msg in message:
+            yield msg            # ← "stream" côté returns = yield
 
     # ================= 3. CLIENT STREAMING =================
     def UploadBatch(self, request_iterator, context):

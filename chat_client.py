@@ -13,7 +13,7 @@ print("Unary :", ack.text)
 
 # ---- 2. SERVER STREAMING : on boucle sur les réponses poussées ----
 print("\nHistorique de Mounir :")
-for msg in stub.History(chat_pb2.ChatMessage(user="Mounir")):
+for msg in stub.History(chat_pb2.HistoryRequest(user="Mounir", limit=3)):
     print(f"  [{msg.timestamp}] {msg.user}: {msg.text}")
 
 # ---- 3. CLIENT STREAMING : on passe un GÉNÉRATEUR au stub ----

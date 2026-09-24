@@ -5,7 +5,7 @@ import warnings
 
 import chat_pb2 as chat__pb2
 
-GRPC_GENERATED_VERSION = '1.84.0'
+GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -25,7 +25,7 @@ if _version_not_supported:
     )
 
 
-class ChatServiceStub:
+class ChatServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -41,7 +41,7 @@ class ChatServiceStub:
                 _registered_method=True)
         self.History = channel.unary_stream(
                 '/chat.v1.ChatService/History',
-                request_serializer=chat__pb2.ChatMessage.SerializeToString,
+                request_serializer=chat__pb2.HistoryRequest.SerializeToString,
                 response_deserializer=chat__pb2.ChatMessage.FromString,
                 _registered_method=True)
         self.UploadBatch = channel.stream_unary(
@@ -56,7 +56,7 @@ class ChatServiceStub:
                 _registered_method=True)
 
 
-class ChatServiceServicer:
+class ChatServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SendMessage(self, request, context):
@@ -97,7 +97,7 @@ def add_ChatServiceServicer_to_server(servicer, server):
             ),
             'History': grpc.unary_stream_rpc_method_handler(
                     servicer.History,
-                    request_deserializer=chat__pb2.ChatMessage.FromString,
+                    request_deserializer=chat__pb2.HistoryRequest.FromString,
                     response_serializer=chat__pb2.ChatMessage.SerializeToString,
             ),
             'UploadBatch': grpc.stream_unary_rpc_method_handler(
@@ -118,7 +118,7 @@ def add_ChatServiceServicer_to_server(servicer, server):
 
 
  # This class is part of an EXPERIMENTAL API.
-class ChatService:
+class ChatService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -163,7 +163,7 @@ class ChatService:
             request,
             target,
             '/chat.v1.ChatService/History',
-            chat__pb2.ChatMessage.SerializeToString,
+            chat__pb2.HistoryRequest.SerializeToString,
             chat__pb2.ChatMessage.FromString,
             options,
             channel_credentials,
