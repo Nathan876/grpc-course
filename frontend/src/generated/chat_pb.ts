@@ -85,44 +85,44 @@ if (goog.DEBUG && !COMPILED) {
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.chat.v1.ChatMessage.prototype.toObject = function(opt_includeInstance) {
-  return proto.chat.v1.ChatMessage.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.chat.v1.ChatMessage} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.chat.v1.ChatMessage.toObject = function(includeInstance, msg) {
-  var f, obj = {
-user: jspb.Message.getFieldWithDefault(msg, 1, ""),
-text: jspb.Message.getFieldWithDefault(msg, 2, ""),
-timestamp: jspb.Message.getFieldWithDefault(msg, 3, "")
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.chat.v1.ChatMessage.prototype.toObject = function(opt_includeInstance) {
+    return proto.chat.v1.ChatMessage.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
+
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.chat.v1.ChatMessage} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.chat.v1.ChatMessage.toObject = function(includeInstance, msg) {
+    var f, obj = {
+      user: jspb.Message.getFieldWithDefault(msg, 1, ""),
+      text: jspb.Message.getFieldWithDefault(msg, 2, ""),
+      timestamp: jspb.Message.getFieldWithDefault(msg, 3, "")
+    };
+
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
 }
 
 
@@ -152,21 +152,21 @@ proto.chat.v1.ChatMessage.deserializeBinaryFromReader = function(msg, reader) {
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readStringRequireUtf8());
-      msg.setUser(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readStringRequireUtf8());
-      msg.setText(value);
-      break;
-    case 3:
-      var value = /** @type {string} */ (reader.readStringRequireUtf8());
-      msg.setTimestamp(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readStringRequireUtf8());
+        msg.setUser(value);
+        break;
+      case 2:
+        var value = /** @type {string} */ (reader.readStringRequireUtf8());
+        msg.setText(value);
+        break;
+      case 3:
+        var value = /** @type {string} */ (reader.readStringRequireUtf8());
+        msg.setTimestamp(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
@@ -282,44 +282,44 @@ proto.chat.v1.SubscribeRequest.repeatedFields_ = [2];
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.chat.v1.SubscribeRequest.prototype.toObject = function(opt_includeInstance) {
-  return proto.chat.v1.SubscribeRequest.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.chat.v1.SubscribeRequest} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.chat.v1.SubscribeRequest.toObject = function(includeInstance, msg) {
-  var f, obj = {
-user: jspb.Message.getFieldWithDefault(msg, 1, ""),
-messagesList: jspb.Message.toObjectList(msg.getMessagesList(),
-    proto.chat.v1.ChatMessage.toObject, includeInstance)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.chat.v1.SubscribeRequest.prototype.toObject = function(opt_includeInstance) {
+    return proto.chat.v1.SubscribeRequest.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
+
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.chat.v1.SubscribeRequest} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.chat.v1.SubscribeRequest.toObject = function(includeInstance, msg) {
+    var f, obj = {
+      user: jspb.Message.getFieldWithDefault(msg, 1, ""),
+      messagesList: jspb.Message.toObjectList(msg.getMessagesList(),
+        proto.chat.v1.ChatMessage.toObject, includeInstance)
+    };
+
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
 }
 
 
@@ -349,18 +349,18 @@ proto.chat.v1.SubscribeRequest.deserializeBinaryFromReader = function(msg, reade
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readStringRequireUtf8());
-      msg.setUser(value);
-      break;
-    case 2:
-      var value = new proto.chat.v1.ChatMessage;
-      reader.readMessage(value,proto.chat.v1.ChatMessage.deserializeBinaryFromReader);
-      msg.addMessages(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readStringRequireUtf8());
+        msg.setUser(value);
+        break;
+      case 2:
+        var value = new proto.chat.v1.ChatMessage;
+        reader.readMessage(value,proto.chat.v1.ChatMessage.deserializeBinaryFromReader);
+        msg.addMessages(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
@@ -436,7 +436,7 @@ proto.chat.v1.SubscribeRequest.prototype.getMessagesList = function() {
 /**
  * @param {!Array<!proto.chat.v1.ChatMessage>} value
  * @return {!proto.chat.v1.SubscribeRequest} returns this
-*/
+ */
 proto.chat.v1.SubscribeRequest.prototype.setMessagesList = function(value) {
   return jspb.Message.setRepeatedWrapperField(this, 2, value);
 };
@@ -465,42 +465,42 @@ proto.chat.v1.SubscribeRequest.prototype.clearMessagesList = function() {
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.chat.v1.UploadSummary.prototype.toObject = function(opt_includeInstance) {
-  return proto.chat.v1.UploadSummary.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.chat.v1.UploadSummary} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.chat.v1.UploadSummary.toObject = function(includeInstance, msg) {
-  var f, obj = {
-count: jspb.Message.getFieldWithDefault(msg, 1, 0)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.chat.v1.UploadSummary.prototype.toObject = function(opt_includeInstance) {
+    return proto.chat.v1.UploadSummary.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
+
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.chat.v1.UploadSummary} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.chat.v1.UploadSummary.toObject = function(includeInstance, msg) {
+    var f, obj = {
+      count: jspb.Message.getFieldWithDefault(msg, 1, 0)
+    };
+
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
 }
 
 
@@ -530,13 +530,13 @@ proto.chat.v1.UploadSummary.deserializeBinaryFromReader = function(msg, reader) 
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setCount(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {number} */ (reader.readInt32());
+        msg.setCount(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;

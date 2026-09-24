@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ChatMessage } from "../generated/chat_pb";      // classe message générée
-import { client } from "../grpc/client";                 // le stub du 3.5
+import { ChatMessage } from '../generated/chat_pb.js'                 // le stub du 3.5
+import { client } from "../grpc/client";
 
 export function SendMessage() {
   const [text, setText] = useState("");
