@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChatMessage } from "../generated/Chat_pb";
+import { ChatMessage, HistoryRequest } from "../generated/chat_pb";
 import { client } from "../grpc/client";
 
 // La forme d'un message côté UI (découplé du type protobuf)
@@ -17,18 +17,17 @@ export function useChat(myName: string) {
   const [error, setError] = useState("");
   const counter = useRef(0);          // compteur d'ids uniques, survit aux re-renders
 
-  // ---------- CONNEXION : on ouvre le flux DESCENDANT une seule fois ----------
-  useEffect(() => {
-    // Requête "d'entrée" : qui je suis (le serveur m'enregistre)
-    const hello = new ChatMessage().setUser(myName).setText("__join__");
+  // ⚠️ grpc-web ne génère QUE des méthodes Unary et Server Streaming pour le
+  // navigateur : il n'y a pas de client.chat() (bidirectionnel) ni de
+  // client.uploadBatch() (client streaming). On simule le "temps réel" en
+  // rechargeant l'historique (Server Streaming) au montage et après chaque envoi.
+  const loadHistory = useCallback(() => {
+    setMessages([]);
+    // History attend un HistoryRequest (user + limit), pas un ChatMessage
+    const request = new HistoryRequest().setUser(myName).setLimit(50);
+    const stream = client.history(request, {});
 
-    // bidirectional : renvoie un objet avec .on("data") ET .write()
-    const stream = client.history(hello, {})
-    setConnected(true);
-
-    // Chaque message POUSSÉ par le serveur (broadcast du Module 2, §2.3)
     stream.on("data", (msg: ChatMessage) => {
-      // On détecte si c'est moi qui l'ai envoyé (le serveur le broadcaste à tous, moi compris)
       const mine = msg.getUser() === myName;
       setMessages((prev) => [
         ...prev,
@@ -47,16 +46,21 @@ export function useChat(myName: string) {
       setError(`Connexion perdue : ${err.message}`);
     });
 
-    stream.on("end", () => setConnected(false));
+    return stream;
+  }, [myName]);
+
+  // ---------- CONNEXION : on charge l'historique au montage ----------
+  useEffect(() => {
+    setConnected(true);
+    const stream = loadHistory();
 
     // Nettoyage au démontage : on FERME le flux (règle d'or du Module 3)
     return () => {
       stream.cancel();
-      setConnected(false);
     };
-  }, [myName]);     // si myName change, on se reconnecte
+  }, [loadHistory]);     // si myName change, on se reconnecte
 
-  // ---------- ENVOI : chaque message part dans le flux MONTANT ----------
+  // ---------- ENVOI : appel unary, puis rechargement de l'historique ----------
   const send = useCallback(
     (text: string) => {
       if (!text.trim()) return;
@@ -65,12 +69,13 @@ export function useChat(myName: string) {
       .setText(text)
       .setTimestamp(new Date().toISOString());
 
-      // Écrit dans le flux montant. Côté grpc-web, write() met en file
-      // et le message part dès que le canal le permet.
-      streamRef.current?.write(msg);
+      client.sendMessage(msg, {})
+        .then(() => loadHistory())
+        .catch((err) => setError(`Envoi échoué : ${err.message}`));
     },
-    [myName]
+    [myName, loadHistory]
   );
 
-  return { messages, send, connected, error };
+  return { messages, send,
+    connected, error };
 }

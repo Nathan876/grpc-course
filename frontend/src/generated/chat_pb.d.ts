@@ -76,3 +76,27 @@ export namespace UploadSummary {
   };
 }
 
+export class HistoryRequest extends jspb.Message {
+  constructor();
+  constructor(opt_data?: HistoryRequest.AsObject);
+  getUser(): string;
+  setUser(value: string): HistoryRequest;
+
+  getLimit(): number;
+  setLimit(value: number): HistoryRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): HistoryRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: HistoryRequest): HistoryRequest.AsObject;
+  static serializeBinaryToWriter(message: HistoryRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): HistoryRequest;
+  static deserializeBinaryFromReader(message: HistoryRequest, reader: jspb.BinaryReader): HistoryRequest;
+}
+
+export namespace HistoryRequest {
+  export type AsObject = {
+    user: string;
+    limit: number;
+  };
+}
+

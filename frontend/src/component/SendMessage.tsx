@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { ChatMessage } from '../generated/chat_pb.js'                 // le stub du 3.5
 import { client } from "../grpc/client";
+import { ChatMessage } from '../generated/chat_pb.ts' // le stub du 3.5
 
 export function SendMessage() {
   const [text, setText] = useState("");
   const [ack, setAck] = useState("");
   const [error, setError] = useState("");
+  const metadata = { "x-request-id": "abc-123" };
 
   // L'appel unary : l'équivalent du stub.SendMessage() de Python !
   const send = async () => {
@@ -18,7 +19,7 @@ export function SendMessage() {
 
     try {
       // 2. L'appel RPC — "unary" = 1 requête, 1 réponse
-      const response = await client.sendMessage(request, {});
+      const response = await client.sendMessage(request, metadata);
       // 3. On lit la réponse TYPÉE (getText() existe grâce au .proto)
       setAck(response.getText());
       setText("");

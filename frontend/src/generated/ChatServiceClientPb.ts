@@ -31,7 +31,7 @@ export class ChatServiceClient {
                options?: null | { [index: string]: any; }) {
     if (!options) options = {};
     if (!credentials) credentials = {};
-    options['format'] = 'binary';
+    options['format'] = 'text';
 
     this.client_ = new grpcWeb.GrpcWebClientBase(options);
     this.hostname_ = hostname.replace(/\/+$/, '');
@@ -85,16 +85,16 @@ export class ChatServiceClient {
   methodDescriptorHistory = new grpcWeb.MethodDescriptor(
     '/chat.v1.ChatService/History',
     grpcWeb.MethodType.SERVER_STREAMING,
+    chat_pb.HistoryRequest,
     chat_pb.ChatMessage,
-    chat_pb.ChatMessage,
-    (request: chat_pb.ChatMessage) => {
+    (request: chat_pb.HistoryRequest) => {
       return request.serializeBinary();
     },
     chat_pb.ChatMessage.deserializeBinary
   );
 
   history(
-    request: chat_pb.ChatMessage,
+    request: chat_pb.HistoryRequest,
     metadata?: grpcWeb.Metadata): grpcWeb.ClientReadableStream<chat_pb.ChatMessage> {
     return this.client_.serverStreaming(
       this.hostname_ +
