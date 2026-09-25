@@ -1,10 +1,11 @@
-import { ChatServiceClient } from "../generated/ChatServiceClientPb";
-// ↑ le stub client GÉNÉRÉ au 3.3 — équivalent du UserServiceStub Python
+import { createGrpcWebTransport } from "@connectrpc/connect-web";
+import { createPromiseClient } from "@connectrpc/connect";
+import { ChatService } from "../generated/chat_connect";
 
 // Adresse du PROXY Envoy (8080), PAS du serveur Python (50052) !
 // En dev : Vite sert sur 5173, on passe par le proxy pour éviter le CORS.
-export const client = new ChatServiceClient(
-  "http://localhost:8080",     // si Envoy tourne à côté de Vite, sinon "/api"
-  null,                        // credentials (null = pas d'auth pour l'instant)
-  null                         // options avancées (null = défauts)
-);
+const transport = createGrpcWebTransport({
+  baseUrl: "http://localhost:8080",
+});
+
+export const client = createPromiseClient(ChatService, transport);

@@ -1,15 +1,20 @@
 import sys
-from xml.dom import NOT_FOUND_ERR
+import queue
+import threading
+from concurrent import futures
+import grpc
+
+# Imports du Health Check gRPC
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
 sys.path.append('generated')
-import grpc
-from concurrent import futures
 from generated import chat_pb2, chat_pb2_grpc
+from interceptors.auth_interceptor import AuthInterceptor, check_jwt, JWT_SECRET
 
 # ---- L'état partagé du serveur (en mémoire pour le cours) ----
 MESSAGES = []          # Historique de tous les messages reçus
 SUBSCRIBERS = []       # Files d'attente des clients connectés en bidirectionnel
-
+JWT_SECRET = "JE_SUIS_UNE_CLE_SECRETE_PAS_TRES_SECRETE"
 
 class ChatService(chat_pb2_grpc.ChatServiceServicer):
 
@@ -18,7 +23,10 @@ class ChatService(chat_pb2_grpc.ChatServiceServicer):
         """Le cas simple : 1 requête → 1 réponse.
         `request` est déjà un objet ChatMessage décodé.
         On stocke, on renvoie un accusé (ici : le message horodaté)."""
+        check_jwt(context)   # abort UNAUTHENTICATED si le JWT est absent/invalide
+
         MESSAGES.append(request)
+
         return chat_pb2.ChatMessage(
             user=request.user,
             text=f"✅ Reçu par le serveur : {request.text}",
@@ -71,7 +79,6 @@ class ChatService(chat_pb2_grpc.ChatServiceServicer):
           et le broadcaste dans la queue de tous les connectés ;
         - le générateur (cette méthode) lit SA propre queue et yield
           chaque message au client."""
-        import queue, threading
         my_queue = queue.Queue()
         SUBSCRIBERS.append(my_queue)
 
@@ -91,14 +98,52 @@ class ChatService(chat_pb2_grpc.ChatServiceServicer):
             except queue.Empty:
                 continue                          # rien reçu : on reboucle
 
+    # ================= 5. LOGIN =================
+    def Login(self, request, context):
+        if not request.username.strip():
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Le nom d'utilisateur est vide")
+
+        payload = {
+            "sub": request.username,
+        }
+
+        token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
+
+        return chat_pb2.LoginResponse(token=token)
 
 def serve():
+    # 1. Chargement des certificats mTLS
+    with open("certs/server.key", "rb") as f:
+        private_key = f.read()
+    with open("certs/server.crt", "rb") as f:
+        cert_chain = f.read()
+    with open("certs/ca.crt", "rb") as f:
+        root_ca = f.read()
+
+    server_credentials = grpc.ssl_server_credentials(
+        private_key_certificate_chain_pairs=[(private_key, cert_chain)],
+        root_certificates=root_ca,
+        require_client_auth=True,
+    )
+
+    # 2. Initialisation du serveur gRPC
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+
+    # 3. 🩺 AJOUT DU HEALTH CHECK
+    health_servicer = health.HealthServicer()
+    health_pb2_grpc.add_HealthServicer_to_server(health_servicer, server)
+    health_servicer.set("", health_pb2.HealthCheckResponse.SERVING)
+
+    # 4. Ajout de votre service de Chat
     chat_pb2_grpc.add_ChatServiceServicer_to_server(ChatService(), server)
-    server.add_insecure_port("[::]:50052")
+
+    # 5. Configuration du port sécurisé et démarrage
+    server.add_secure_port("0.0.0.0:50052", server_credentials)
+
     server.start()
-    print("✅ Serveur Chat gRPC sur le port 50052")
+    print("✅ Serveur gRPC sécurisé (mTLS + Health Check) démarré sur le port 50052")
     server.wait_for_termination()
+
 
 if __name__ == "__main__":
     serve()

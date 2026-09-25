@@ -7,7 +7,7 @@ message ChatMessage {
   string timestamp = 3;        // ISO 8601, format string pour rester simple
 }
 
-message SubscribeRequest {          // CLIENT STREAMING (2.5)
+message SubscribeRequest {// CLIENT STREAMING (2.5)
   string user = 1;
   repeated ChatMessage messages = 2;  // "repeated" = liste (0 à N éléments)
 }
@@ -19,6 +19,14 @@ message UploadSummary {
 message HistoryRequest {
   string user = 1;
   int32 limit = 2;
+}
+
+message LoginRequest {
+  string username = 1;
+}
+
+message LoginResponse {
+  string token = 1;
 }
 
 service ChatService {
@@ -33,4 +41,7 @@ service ChatService {
 
   // BIDIRECTIONNEL : chat en temps réel
   rpc Chat (stream ChatMessage) returns (stream ChatMessage);
+
+  // TOKEN : récupération du pseudo et generation de token
+  rpc Login (LoginRequest) returns (LoginResponse);
 }

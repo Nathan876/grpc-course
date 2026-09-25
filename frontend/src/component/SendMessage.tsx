@@ -11,17 +11,18 @@ export function SendMessage() {
   // L'appel unary : l'équivalent du stub.SendMessage() de Python !
   const send = async () => {
     setError(""); setAck("");
-    // 1. On construit la requête avec la classe générée (setUser, setText…)
-    const request = new ChatMessage()
-    .setUser("Mounir")
-    .setText(text)
-    .setTimestamp(new Date().toISOString());
+    // 1. On construit la requête avec la classe générée (constructeur par objet)
+    const request = new ChatMessage({
+      user: "Mounir",
+      text,
+      timestamp: new Date().toISOString()
+    });
 
     try {
       // 2. L'appel RPC — "unary" = 1 requête, 1 réponse
-      const response = await client.sendMessage(request, metadata);
-      // 3. On lit la réponse TYPÉE (getText() existe grâce au .proto)
-      setAck(response.getText());
+      const response = await client.sendMessage(request, { headers: metadata });
+      // 3. On lit la réponse TYPÉE (le champ .text existe grâce au .proto)
+      setAck(response.text);
       setText("");
     } catch (err: any) {
       // 4. Les erreurs gRPC arrivent ici — mêmes codes que Python ! (Module 2, 2.5)

@@ -11,85 +11,88 @@ export interface UiMessage {
   mine: boolean;
 }
 
-// Entre deux onglets sur le même myName, gRPC-web ne peut rien pousser tout
-// seul (pas de bidi côté navigateur) : on rafraîchit l'historique à
-// intervalle régulier pour simuler le "temps réel".
-const POLL_INTERVAL_MS = 4000
-
 export function useChat (myName: string) {
   const [messages, setMessages] = useState<UiMessage[]>([])
   const [connected, setConnected] = useState(false)
   const [error, setError] = useState('')
   const [retryable, setRetryable] = useState(false)
   const counter = useRef(0)
-  const streamRef = useRef<any>(null)
+  const abortRef = useRef<AbortController | null>(null)
   const lastActionRef = useRef<(() => void) | null>(null)
 
   const loadHistory = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.cancel()
-    }
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
 
     setMessages([])
-    const request = new HistoryRequest().setUser(myName).setLimit(50)
-
-    const stream = client.history(request, {})
-    streamRef.current = stream
+    const request = new HistoryRequest({ user: myName, limit: 50 })
     setConnected(true)
 
-    stream.on('data', (msg: ChatMessage) => {
-      const mine = msg.getUser() === myName
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: ++counter.current,
-          user: msg.getUser(),
-          text: msg.getText(),
-          timestamp: msg.getTimestamp(),
-          mine
+    void (async () => {
+      try {
+        for await (const msg of client.history(request, { signal: controller.signal })) {
+          const mine = msg.user === myName
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: ++counter.current,
+              user: msg.user,
+              text: msg.text,
+              timestamp: msg.timestamp,
+              mine
+            }
+          ])
         }
-      ])
-    })
+      } catch (err: any) {
+        if (controller.signal.aborted) return
+        setConnected(false)
+        const { message, retryable } = grpcErrorMessage(err)
+        setError(message)
+        setRetryable(retryable)
+        lastActionRef.current = () => loadHistory()
+      }
+    })()
 
-    stream.on('error', (err: any) => {
-      setConnected(false)
-      const { message, retryable } = grpcErrorMessage(err)
-      setError(message)
-      setRetryable(retryable)
-      lastActionRef.current = () => loadHistory()
-    })
-
-    return stream
+    return () => controller.abort()
   }, [myName])
 
   useEffect(() => {
     setConnected(true)
-    const stream = loadHistory()
-    const poll = setInterval(loadHistory, POLL_INTERVAL_MS)
+    const cancel = loadHistory()
 
     return () => {
-      clearInterval(poll)
-      if (stream) stream.cancel()
+      cancel()
     }
   }, [loadHistory])
 
   const send = useCallback(
-    (text: string) => {
+    async (text: string) => {
       if (!text.trim()) return
       setError('')
-      const msg = new ChatMessage()
-      .setUser(myName)
-      .setText(text)
-      .setTimestamp(new Date().toISOString())
+      const msg = new ChatMessage({
+        user: myName,
+        text,
+        timestamp: new Date().toISOString()
+      })
 
-      client.sendMessage(msg, {})
-      .then(() => loadHistory())
-      .catch((err: any) => {
+      const token = sessionStorage.getItem("jwt") ?? ""
+
+      try {
+        await client.sendMessage(msg, {
+          headers: {
+            authorization: `Bearer ${token}`,
+            "x-request-id": "abc-123"
+          }
+        })
+
+        loadHistory()
+      } catch (err: any) {
         const { message, retryable } = grpcErrorMessage(err)
         setError(message)
         setRetryable(retryable)
         lastActionRef.current = () => send(text)
-      })
+      }
     },
     [myName, loadHistory]
   )

@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ChatMessage, SubscribeRequest, UploadSummary } from "./chat_pb.js";
+import { ChatMessage, HistoryRequest, LoginRequest, LoginResponse, SubscribeRequest, UploadSummary } from "./chat_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -30,7 +30,7 @@ export const ChatService = {
      */
     history: {
       name: "History",
-      I: ChatMessage,
+      I: HistoryRequest,
       O: ChatMessage,
       kind: MethodKind.ServerStreaming,
     },
@@ -55,6 +55,17 @@ export const ChatService = {
       I: ChatMessage,
       O: ChatMessage,
       kind: MethodKind.BiDiStreaming,
+    },
+    /**
+     * TOKEN : récupération du pseudo et generation de token
+     *
+     * @generated from rpc chat.v1.ChatService.Login
+     */
+    login: {
+      name: "Login",
+      I: LoginRequest,
+      O: LoginResponse,
+      kind: MethodKind.Unary,
     },
   }
 } as const;

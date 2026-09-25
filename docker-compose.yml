@@ -1,0 +1,24 @@
+services:
+  backend:
+    build: .
+    ports: ["50052:50052"]
+    volumes: ["./certs:/app/certs:ro"]     # certificats en lecture seule
+    healthcheck:                            # sonde vu en 5.4
+      test: ["CMD", "grpc_health_probe", "-addr=localhost:50052"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+
+  envoy:
+    image: envoyproxy/envoy:v1.30-latest
+    ports: ["8080:8080"]
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml:ro
+      - ./certs:/etc/envoy/certs:ro
+    depends_on:
+      backend: { condition: service_healthy }   # démarre SEULEMENT si le backend est sain
+
+  frontend:
+    build: ./frontend                    # Dockerfile du front : build React + Nginx
+    ports: ["443:443"]
+    depends_on: [envoy]

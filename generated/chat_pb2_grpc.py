@@ -5,7 +5,7 @@ import warnings
 
 import chat_pb2 as chat__pb2
 
-GRPC_GENERATED_VERSION = '1.80.0'
+GRPC_GENERATED_VERSION = '1.84.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -25,7 +25,7 @@ if _version_not_supported:
     )
 
 
-class ChatServiceStub(object):
+class ChatServiceStub:
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -54,9 +54,14 @@ class ChatServiceStub(object):
                 request_serializer=chat__pb2.ChatMessage.SerializeToString,
                 response_deserializer=chat__pb2.ChatMessage.FromString,
                 _registered_method=True)
+        self.Login = channel.unary_unary(
+                '/chat.v1.ChatService/Login',
+                request_serializer=chat__pb2.LoginRequest.SerializeToString,
+                response_deserializer=chat__pb2.LoginResponse.FromString,
+                _registered_method=True)
 
 
-class ChatServiceServicer(object):
+class ChatServiceServicer:
     """Missing associated documentation comment in .proto file."""
 
     def SendMessage(self, request, context):
@@ -87,6 +92,13 @@ class ChatServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Login(self, request, context):
+        """TOKEN : récupération du pseudo et generation de token
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ChatServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -110,6 +122,11 @@ def add_ChatServiceServicer_to_server(servicer, server):
                     request_deserializer=chat__pb2.ChatMessage.FromString,
                     response_serializer=chat__pb2.ChatMessage.SerializeToString,
             ),
+            'Login': grpc.unary_unary_rpc_method_handler(
+                    servicer.Login,
+                    request_deserializer=chat__pb2.LoginRequest.FromString,
+                    response_serializer=chat__pb2.LoginResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
             'chat.v1.ChatService', rpc_method_handlers)
@@ -118,7 +135,7 @@ def add_ChatServiceServicer_to_server(servicer, server):
 
 
  # This class is part of an EXPERIMENTAL API.
-class ChatService(object):
+class ChatService:
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -219,6 +236,33 @@ class ChatService(object):
             '/chat.v1.ChatService/Chat',
             chat__pb2.ChatMessage.SerializeToString,
             chat__pb2.ChatMessage.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Login(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/chat.v1.ChatService/Login',
+            chat__pb2.LoginRequest.SerializeToString,
+            chat__pb2.LoginResponse.FromString,
             options,
             channel_credentials,
             insecure,
